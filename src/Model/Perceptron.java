@@ -2,6 +2,7 @@ package Model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Perceptron {
 
@@ -9,6 +10,11 @@ public class Perceptron {
    private List<Double> weightsVector;
    private double thetaThreshold;
    private double alpha;
+
+
+    public boolean isTrainedFroTheLanguage(Map<Character, Double> proportionsMap){
+        return false;
+    }
 
     public String getTrainedForLanguageName() {
         return trainedForLanguageName;

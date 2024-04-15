@@ -16,7 +16,7 @@ public class Main {
 
         for (String directoryName : FileReaderService.getListOfSubdirectories(trainingData)) {
 
-            List<Map<Character, Double>> listOfMapOfProportions = new ArrayList<>();
+            List<Map<Character, Double>> observations = new ArrayList<>();
 
             for (String fileName : FileReaderService.getListOfFilesInDirectory(trainingData +
                     System.getProperty("file.separator") + directoryName)) {
@@ -27,10 +27,10 @@ public class Main {
                 Map<Character, Double> proportionsMap =
                         TextToCharacterProportionMapParserService.parseTextToCharacterProportionMap(text);
 
-                listOfMapOfProportions.add(proportionsMap);
+                observations.add(proportionsMap);
             }
 
-            languageList.add(new Language(directoryName, listOfMapOfProportions));
+            languageList.add(new Language(directoryName, observations));
         }
 
 
@@ -43,31 +43,45 @@ public class Main {
             //TODO:
             //add perceptron for each language
             //perceptronLayer.add(new Perceptron());
-             perceptronLayer.add(new Perceptron(language.getCharacterProportionMapList().get(0).size()-2,0.05,language.getName()));
+            //trainperceptron
         }
 
-        List<Node> trainList = new ArrayList<>();
+        //Testowanie
+        String testData = "./TestData";
+        int correctPredictions = 0;
+        int totalPredictions = 0;
 
-        for (Language language : languageList) {
-            for (Map<Character,Long> singleMap:language.getCharacter()) {
-                List<Double> attributesColumn = new ArrayList<>();
-                for (int i = 'a'; i <= 'z'; i++)
-                    attributesColumn.add((singleMap.get((char) i) / (double)((singleMap.get('@') - singleMap.get('!')))));
-                trainList.add(new Node(attributesColumn,language.getName()));
+        for (String directoryName : FileReaderService.getListOfSubdirectories(testData)) {
+
+            for (String fileName : FileReaderService.getListOfFilesInDirectory(testData +
+                    System.getProperty("file.separator") + directoryName)) {
+
+                String text = FileReaderService.readFile(testData + System.getProperty("file.separator") +
+                        directoryName + System.getProperty("file.separator") + fileName);
+
+                Map<Character, Double> proportionsMap =
+                        TextToCharacterProportionMapParserService.parseTextToCharacterProportionMap(text);
+
+                String languageName = "";
+                for (Perceptron p : perceptronLayer) {
+                    if (p.isTrainedFroTheLanguage(proportionsMap)) {
+                        languageName = p.getTrainedForLanguageName();
+                        System.out.println("Predicted: " + languageName + " Actual: " + directoryName);
+                        break;
+                    }
+                }
+
+                if (languageName.equals(directoryName)) {
+                    correctPredictions++;
+                    System.out.println("Correct prediction");
+                }
+                totalPredictions++;
             }
         }
 
-        for (int i = 0; i < languageList.size() * 10000; i++) {
-            Collections.shuffle(trainList);
-            for (Node node : trainList)
-                for (Perceptron perceptron : perceptronLayer)
-                    perceptron.learn(node, (node.getNodeClassName().equals(perceptron.getTrainedForLanguageName()) ? 1 : 0));
-        }
+        //print accuracy
 
-        for (Perceptron perceptron : perceptronLayer)
-            perceptron.normalizePerceptron();
-
-       // SwingUtilities.invokeLater(() -> new PerceptronLayerView(perceptronLayer));
+        System.out.println("Accuracy: " + (double) correctPredictions / totalPredictions);
 
 
     }

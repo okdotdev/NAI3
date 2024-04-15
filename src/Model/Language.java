@@ -7,11 +7,11 @@ import java.util.Map;
 public class Language {
 
     String name;
-    List<Map<Character, Double>> characterProportionMapList;
+    List<Map<Character, Double>> observations;
 
     public Language(String name, List<Map<Character, Double>> mapList) {
         this.name = name;
-        this.characterProportionMapList = mapList;
+        this.observations = mapList;
     }
 
 
@@ -23,7 +23,7 @@ public class Language {
         this.name = name;
     }
 
-    public List<Map<Character,Double>> getCharacterProportionMapList() {
-        return characterProportionMapList;
+    public List<Map<Character,Double>> getObservations() {
+        return observations;
     }
 }
