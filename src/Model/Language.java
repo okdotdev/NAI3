@@ -19,11 +19,7 @@ public class Language {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public List<Map<Character,Double>> getObservations() {
+    public List<Map<Character,Double>> getLanguageObservations() {
         return observations;
     }
 }

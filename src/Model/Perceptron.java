@@ -1,85 +1,96 @@
 package Model;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Perceptron {
 
-    String trainedForLanguageName;
-   private List<Double> weightsVector;
-   private double thetaThreshold;
-   private double alpha;
+    private final String trainedForLanguageName;
+    private final Map<Character, Double> weightsMap;
+    private final double thetaThreshold;
+    private final double alpha;
 
+    public Perceptron(int vectorSize, double alpha, String trainedForLanguage) {
+        this.trainedForLanguageName = trainedForLanguage;
+        this.alpha = alpha;
+        this.weightsMap = new HashMap<>();
 
-    public boolean isTrainedFroTheLanguage(Map<Character, Double> proportionsMap){
-        return false;
+        for (int i = 0; i < vectorSize; i++) {
+            weightsMap.put((char) ('a' + i), 0.0);
+        }
+
+        this.thetaThreshold = 1.0;
     }
+
+    public void trainPerceptronForLanguage(List<Map<Character, Double>> observations) {
+        while (!isPerceptronTrainedForObservationsOfLanguage(observations)) {
+            trainingEpoch(observations);
+        }
+    }
+
+    private boolean isPerceptronTrainedForObservationsOfLanguage(List<Map<Character, Double>> observations) {
+        for (Map<Character, Double> observation : observations) {
+            if (!hasCorrectPrediction(observation)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean hasCorrectPrediction(Map<Character, Double> observation) {
+        double output = calculateOutput(observation);
+        double expectedOutput = observation.get('a') == 1.0 ? 1.0 : 0.0;
+        return output == expectedOutput;
+    }
+
+
+    private void trainingEpoch(List<Map<Character, Double>> observations) {
+        for (Map<Character, Double> observation : observations) {
+            double output = calculateOutput(observation);
+            double expectedOutput = observation.get('a') == 1.0 ? 1.0 : 0.0;
+            updateWeights(observation, expectedOutput, output);
+        }
+    }
+
+
+    private void updateWeights(Map<Character, Double> observation, double expectedOutput, double output) {
+        for (Character character : observation.keySet()) {
+
+            if (!weightsMap.containsKey(character) || !observation.containsKey(character)) {
+                continue;
+            }
+
+            double newWeight = weightsMap.get(character) + alpha * (expectedOutput - output) * observation.get(character);
+            weightsMap.put(character, newWeight);
+        }
+    }
+
+
+    public double calculateOutput(Map<Character, Double> proportionsMap) {
+        double netValue = 0;
+        for (Character character : proportionsMap.keySet()) {
+            if (!weightsMap.containsKey(character)) {
+                continue;
+            }
+            netValue += proportionsMap.get(character) * weightsMap.get(character);
+
+        }
+        return netValue > thetaThreshold ? 1.0 : 0.0;
+    }
+
 
     public String getTrainedForLanguageName() {
         return trainedForLanguageName;
     }
 
-    public Perceptron(int vectorSize, double alpha, String trainedForLanguage) {
-        this.trainedForLanguageName =trainedForLanguage;
-        this.alpha = alpha;
-        this.weightsVector = new ArrayList<>();
-        for (int i = 0; i < vectorSize ; i++) {
-            this.weightsVector.add(1.0);
-            //this.weightsVector.add(Math.random()*2-1);
-        }
-        this.thetaThreshold = 1.0;
-        //this.thetaThreshold = Math.random()*2-1;
-    }
-
-    public void learn(Node node, int correctAnswer){
-        double scalarProduct = 0;
-        for (int i = 0; i < node.getAttributesColumn().size() ; i++) // Calculate X * W
-            scalarProduct += node.getAttributesColumn().get(i) * this.weightsVector.get(i);
-
-        int y = (scalarProduct>=this.thetaThreshold?1:0);
-
-        if (y != correctAnswer) { //Do learn
-            //System.out.println("LEARN - " + trainedForLanguageName);
-            List<Double> vectorWPrime = new ArrayList<>(this.weightsVector);
-            for (int i = 0; i < node.getAttributesColumn().size(); i++) // W' = W + (Correct-Y) * Alpha * X
-                vectorWPrime.set(i, (this.weightsVector.get(i) + ((correctAnswer - y) * alpha * node.getAttributesColumn().get(i))));
-
-            this.weightsVector = vectorWPrime;
-            this.thetaThreshold = thetaThreshold + (correctAnswer - y) * alpha * -1;
-        }
-    }
-
-    public double evaluate(Node node){
-        double scalarProduct = 0;
-        for (int i = 0; i < node.getAttributesColumn().size() ; i++) // Calculate X * W
-            scalarProduct += node.getAttributesColumn().get(i) * this.weightsVector.get(i);
-
-        return scalarProduct - thetaThreshold; //net
-    }
-
-    public void normalizePerceptron(){
-        double sumOfSquares=0;
-
-        for (double d : this.weightsVector)
-            sumOfSquares+=Math.pow(d,2);
-
-        double length = Math.sqrt(sumOfSquares);
-
-        List<Double>  newVectorW = new ArrayList<>();
-
-        for (int i = 0; i < this.weightsVector.size() ; i++)
-            newVectorW.add(i,(this.weightsVector.get(i)/length));
-
-        this.thetaThreshold = thetaThreshold/length;
-        this.weightsVector = newVectorW;
-    }
-
     @Override
     public String toString() {
         return "Perceptron{" +
-                "weightsVector=" + weightsVector +
+                "weightsMap=" + weightsMap +
                 ", thetaThreshold=" + thetaThreshold +
                 '}';
     }
+
+
 }

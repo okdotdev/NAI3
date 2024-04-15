@@ -36,15 +36,8 @@ public class Main {
 
         //Trenowanie Warstwy Perceptronów
 
-        List<Perceptron> perceptronLayer = new ArrayList<>();
-
-
-        for (Language language : languageList) {
-            //TODO:
-            //add perceptron for each language
-            //perceptronLayer.add(new Perceptron());
-            //trainperceptron
-        }
+        PerceptronLayer perceptronLayer = new PerceptronLayer();
+        perceptronLayer.trainLayerForLanguages(languageList);
 
         //Testowanie
         String testData = "./TestData";
@@ -62,26 +55,18 @@ public class Main {
                 Map<Character, Double> proportionsMap =
                         TextToCharacterProportionMapParserService.parseTextToCharacterProportionMap(text);
 
-                String languageName = "";
-                for (Perceptron p : perceptronLayer) {
-                    if (p.isTrainedFroTheLanguage(proportionsMap)) {
-                        languageName = p.getTrainedForLanguageName();
-                        System.out.println("Predicted: " + languageName + " Actual: " + directoryName);
-                        break;
-                    }
-                }
+                String languageName;
 
+                languageName = perceptronLayer.predicateLanguage(proportionsMap);
+                System.out.println("Predicted: " + languageName + " In File: " + directoryName + "/" + fileName);
                 if (languageName.equals(directoryName)) {
                     correctPredictions++;
                     System.out.println("Correct prediction");
                 }
-                totalPredictions++;
+
+
             }
         }
-
-        //print accuracy
-
-        System.out.println("Accuracy: " + (double) correctPredictions / totalPredictions);
 
 
     }
