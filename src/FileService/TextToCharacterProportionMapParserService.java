@@ -8,11 +8,12 @@ public class TextToCharacterProportionMapParserService {
     public static Map<Character, Double> parseTextToCharacterProportionMap(String text) {
         Map<Character, Double> map = new HashMap<>();
         Map<Character, Integer> countMap = getCharacterCountMap(text);
-        int totalCharacterCount = getTotalCharacterCount(text);
+        int totalCharacterCount = getTotalCharacterCount(countMap);
 
         for (char c : countMap.keySet()) {
             map.put(c, countMap.get(c) / (double) totalCharacterCount);
         }
+
         return map;
     }
 
@@ -32,8 +33,12 @@ public class TextToCharacterProportionMapParserService {
         return map;
     }
 
-    private static int getTotalCharacterCount(String text) {
-        return text.length();
+    private static int getTotalCharacterCount(Map<Character, Integer> map) {
+        int total = 0;
+        for (int count : map.values()) {
+            total += count;
+        }
+        return total;
     }
 
 }

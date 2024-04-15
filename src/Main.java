@@ -12,7 +12,7 @@ public class Main {
 
         List<Language> languageList = new ArrayList<>();
 
-        //Wczytanie danych testowych
+        //Wczytanie danych treningowych i stworzenie listy języków
 
         for (String directoryName : FileReaderService.getListOfSubdirectories(trainingData)) {
 
@@ -24,24 +24,17 @@ public class Main {
                 String text = FileReaderService.readFile(trainingData + System.getProperty("file.separator") +
                         directoryName + System.getProperty("file.separator") + fileName);
 
-
                 Map<Character, Double> proportionsMap =
                         TextToCharacterProportionMapParserService.parseTextToCharacterProportionMap(text);
 
-                //Debug:
-                /*
-                System.out.println(text);
-                System.out.println("---------------------------------------------------");
-                System.out.println(proportionsMap);
-                System.out.println("---------------------------------------------------");
-                 */
                 listOfMapOfProportions.add(proportionsMap);
             }
 
             languageList.add(new Language(directoryName, listOfMapOfProportions));
         }
 
-        //Trenowanie Warstwy Perceptronów d
+
+        //Trenowanie Warstwy Perceptronów
 
         List<Perceptron> perceptronLayer = new ArrayList<>();
 
@@ -50,15 +43,8 @@ public class Main {
             //TODO:
             //add perceptron for each language
             //perceptronLayer.add(new Perceptron());
+             perceptronLayer.add(new Perceptron(language.getCharacterProportionMapList().get(0).size()-2,0.05,language.getName()));
         }
-
-
-
-
-       /*
-
-        for (Language language : languageList)
-            perceptronLayer.add(new Perceptron(language.getCharacter().get(0).size()-2,0.05,language.getName()));
 
         List<Node> trainList = new ArrayList<>();
 
@@ -81,9 +67,8 @@ public class Main {
         for (Perceptron perceptron : perceptronLayer)
             perceptron.normalizePerceptron();
 
-        SwingUtilities.invokeLater(() -> new PerceptronLayerView(perceptronLayer));
+       // SwingUtilities.invokeLater(() -> new PerceptronLayerView(perceptronLayer));
 
-        /*
-        */
+
     }
 }
