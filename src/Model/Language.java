@@ -7,9 +7,9 @@ import java.util.Map;
 public class Language {
 
     String name;
-    List<Map<Character, Double>> observations;
+    List<Observation> observations;
 
-    public Language(String name, List<Map<Character, Double>> mapList) {
+    public Language(String name, List<Observation> mapList) {
         this.name = name;
         this.observations = mapList;
     }
@@ -19,7 +19,9 @@ public class Language {
         return name;
     }
 
-    public List<Map<Character,Double>> getLanguageObservations() {
+    public List<Observation> getLanguageObservations() {
         return observations;
     }
+
+
 }

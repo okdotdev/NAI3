@@ -7,30 +7,71 @@ import java.util.Map;
 public class Perceptron {
 
     private final String trainedForLanguageName;
-    private final Map<Character, Double> weightsMap;
-    private final double thetaThreshold;
-    private final double alpha;
+    private final Map<Character, Double> weightsMap; //vector w
+    private double threshold; //theta
+    private final double bias; // b
+    private final double learningRate; //alpha
+    private int epoch = 0;
 
-    public Perceptron(int vectorSize, double alpha, String trainedForLanguage) {
+    public Perceptron(String trainedForLanguage) {
         this.trainedForLanguageName = trainedForLanguage;
-        this.alpha = alpha;
+        this.learningRate = 0.1;
         this.weightsMap = new HashMap<>();
+        int vectorSize = 26; // 26 liter w alfabecie
 
         for (int i = 0; i < vectorSize; i++) {
-            weightsMap.put((char) ('a' + i), 0.0);
+            //weightsMap.put((char) ('a' + i), 0.1 + Math.random());
+            weightsMap.put((char) ('a' + i), 1.0);
         }
 
-        this.thetaThreshold = 1.0;
+        //threshold = 0.1 + Math.random();
+        threshold = 0.0;
+        bias = 0.1;
+
     }
 
-    public void trainPerceptronForLanguage(List<Map<Character, Double>> observations) {
-        while (!isPerceptronTrainedForObservationsOfLanguage(observations)) {
-            trainingEpoch(observations);
+    public void trainPerceptronForLanguage(List<Observation> trainingData) {
+        do {
+            trainingEpoch(trainingData);
+            epoch++;
+
+
+        } while (!isPerceptronTrainedForObservationsOfLanguage(trainingData));
+
+        System.out.println("Weights for " + trainedForLanguageName + " language: " + weightsMap);
+        System.out.println("Threshold for " + trainedForLanguageName + " language: " + threshold);
+        System.out.println("Epochs for " + trainedForLanguageName + " language: " + epoch);
+    }
+
+
+    private void trainingEpoch(List<Observation> observations) {
+        for (Observation observation : observations) {
+            if (!hasCorrectPrediction(observation)) {
+                updateWeights(observation);
+            }
+
         }
     }
 
-    private boolean isPerceptronTrainedForObservationsOfLanguage(List<Map<Character, Double>> observations) {
-        for (Map<Character, Double> observation : observations) {
+    private void updateWeights(Observation observation) {
+        //theta' = theta + (y-d)*b
+        //w' = w + (d-y)*alpha *x
+
+        int d = observation.getOrigin().equals(trainedForLanguageName) ? 1 : 0;
+        int y = predicateLanguage(observation.getProportionsMap()) ? 1 : 0;
+
+        for (Character character : observation.getProportionsMap().keySet()) {
+            double newWeight = weightsMap.get(character);
+            newWeight += (d - y) * learningRate * observation.getProportionsMap().get(character);
+            weightsMap.put(character, newWeight);
+
+        }
+        threshold = threshold + (y - d) * bias;
+
+    }
+
+    private boolean isPerceptronTrainedForObservationsOfLanguage(List<Observation> observations) {
+        for (Observation observation : observations) {
             if (!hasCorrectPrediction(observation)) {
                 return false;
             }
@@ -38,45 +79,40 @@ public class Perceptron {
         return true;
     }
 
-    private boolean hasCorrectPrediction(Map<Character, Double> observation) {
-        double output = calculateOutput(observation);
-        double expectedOutput = observation.get('a') == 1.0 ? 1.0 : 0.0;
-        return output == expectedOutput;
-    }
+    private boolean hasCorrectPrediction(Observation observation) {
+        boolean isThisLanguagePerceptronWasTrainedFor = predicateLanguage(observation.getProportionsMap());
 
-
-    private void trainingEpoch(List<Map<Character, Double>> observations) {
-        for (Map<Character, Double> observation : observations) {
-            double output = calculateOutput(observation);
-            double expectedOutput = observation.get('a') == 1.0 ? 1.0 : 0.0;
-            updateWeights(observation, expectedOutput, output);
+        if (isThisLanguagePerceptronWasTrainedFor && observation.getOrigin().equals(trainedForLanguageName)) {
+            return true;
         }
-    }
 
 
-    private void updateWeights(Map<Character, Double> observation, double expectedOutput, double output) {
-        for (Character character : observation.keySet()) {
-
-            if (!weightsMap.containsKey(character) || !observation.containsKey(character)) {
-                continue;
-            }
-
-            double newWeight = weightsMap.get(character) + alpha * (expectedOutput - output) * observation.get(character);
-            weightsMap.put(character, newWeight);
+        if (isThisLanguagePerceptronWasTrainedFor && !observation.getOrigin().equals(trainedForLanguageName)) {
+            return false;
         }
+
+
+        if (!isThisLanguagePerceptronWasTrainedFor && observation.getOrigin().equals(trainedForLanguageName)) {
+            return false;
+        }
+
+        return !isThisLanguagePerceptronWasTrainedFor && !observation.getOrigin().equals(trainedForLanguageName);
+    }
+
+    public boolean predicateLanguage(Map<Character, Double> proportionsMap) {
+        double netValue = getNetValue(proportionsMap);
+        //  System.out.println("Net value for " + trainedForLanguageName + " language: " + netValue + " Threshold: " + threshold);
+        return netValue >= threshold;
     }
 
 
-    public double calculateOutput(Map<Character, Double> proportionsMap) {
-        double netValue = 0;
+    public double getNetValue(Map<Character, Double> proportionsMap) {
+        double netValue = 0.0;
         for (Character character : proportionsMap.keySet()) {
-            if (!weightsMap.containsKey(character)) {
-                continue;
-            }
             netValue += proportionsMap.get(character) * weightsMap.get(character);
-
         }
-        return netValue > thetaThreshold ? 1.0 : 0.0;
+        //  System.out.println("Net value for " + trainedForLanguageName + " language: " + netValue);
+        return netValue;
     }
 
 
@@ -87,10 +123,6 @@ public class Perceptron {
     @Override
     public String toString() {
         return "Perceptron{" +
-                "weightsMap=" + weightsMap +
-                ", thetaThreshold=" + thetaThreshold +
-                '}';
+                "lang='" + trainedForLanguageName + '}';
     }
-
-
 }

@@ -16,7 +16,7 @@ public class Main {
 
         for (String directoryName : FileReaderService.getListOfSubdirectories(trainingData)) {
 
-            List<Map<Character, Double>> observations = new ArrayList<>();
+            List<Observation> observations = new ArrayList<>();
 
             for (String fileName : FileReaderService.getListOfFilesInDirectory(trainingData +
                     System.getProperty("file.separator") + directoryName)) {
@@ -27,7 +27,9 @@ public class Main {
                 Map<Character, Double> proportionsMap =
                         TextToCharacterProportionMapParserService.parseTextToCharacterProportionMap(text);
 
-                observations.add(proportionsMap);
+                Observation observation = new Observation(proportionsMap, directoryName);
+
+                observations.add(observation);
             }
 
             languageList.add(new Language(directoryName, observations));
@@ -55,19 +57,24 @@ public class Main {
                 Map<Character, Double> proportionsMap =
                         TextToCharacterProportionMapParserService.parseTextToCharacterProportionMap(text);
 
-                String languageName;
+                Observation observation = new Observation(proportionsMap, directoryName);
 
-                languageName = perceptronLayer.predicateLanguage(proportionsMap);
+                String languageName = perceptronLayer.predicateLanguage(observation);
+
+
                 System.out.println("Predicted: " + languageName + " In File: " + directoryName + "/" + fileName);
                 if (languageName.equals(directoryName)) {
                     correctPredictions++;
                     System.out.println("Correct prediction");
                 }
 
-
+                totalPredictions++;
             }
         }
 
+        System.out.println("Correct predictions: " + correctPredictions + " out of " + totalPredictions);
+        double percentage = (double) correctPredictions / totalPredictions * 100;
+        System.out.println("Correct predictions percentage: " + percentage + "%");
 
     }
 }

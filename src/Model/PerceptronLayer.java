@@ -1,8 +1,8 @@
 package Model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 public class PerceptronLayer {
     private final List<Perceptron> perceptronLayer;
@@ -12,22 +12,32 @@ public class PerceptronLayer {
     }
 
     public void trainLayerForLanguages(List<Language> languageList) {
+
+        List<Observation> trainingData = new ArrayList<>();
+        for (Language language : languageList) {
+            trainingData.addAll(language.getLanguageObservations());
+        }
+
+        Collections.shuffle(trainingData);
+
+        //print training data
+
+
+
         for (Language language : languageList) {
             String name = language.getName();
-            Perceptron p = new Perceptron(language.getLanguageObservations().get(0).size(), 0.1, name);
-            p.trainPerceptronForLanguage(language.getLanguageObservations());
+            Perceptron p = new Perceptron(name);
+            p.trainPerceptronForLanguage(trainingData);
+            //  p.trainPerceptronForLanguage(language.getLanguageObservations());
             perceptronLayer.add(p);
         }
     }
 
 
-    public String predicateLanguage(Map<Character, Double> proportionsMap) {
-        double max = 0;
-        String languageName = "";
+    public String predicateLanguage(Observation observation) {
+        String languageName = "NOT_PREDICTED";
         for (Perceptron p : perceptronLayer) {
-            double result = p.calculateOutput(proportionsMap);
-            if (result > max) {
-                max = result;
+            if (p.predicateLanguage(observation.getProportionsMap())) {
                 languageName = p.getTrainedForLanguageName();
             }
         }
