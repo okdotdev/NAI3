@@ -1,6 +1,7 @@
 import FileService.FileReaderService;
 import FileService.TextToCharacterProportionMapParserService;
 import Model.*;
+import View.PerceptronLayerView;
 
 
 import java.util.*;
@@ -75,6 +76,8 @@ public class Main {
         System.out.println("Correct predictions: " + correctPredictions + " out of " + totalPredictions);
         double percentage = (double) correctPredictions / totalPredictions * 100;
         System.out.println("Correct predictions percentage: " + percentage + "%");
+
+        new PerceptronLayerView(perceptronLayer);
 
     }
 }

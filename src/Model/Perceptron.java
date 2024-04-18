@@ -34,8 +34,6 @@ public class Perceptron {
         do {
             trainingEpoch(trainingData);
             epoch++;
-
-
         } while (!isPerceptronTrainedForObservationsOfLanguage(trainingData));
 
         System.out.println("Weights for " + trainedForLanguageName + " language: " + weightsMap);
